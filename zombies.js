@@ -7,8 +7,13 @@
  * @param {string} name     The item's name.
  * @property {string} name
  */
+var newItem = new Item();
 
 
+function Item (name) {
+  this.name = name;
+ 
+}
 /**
  * Class => Weapon(name, damage)
  * -----------------------------
@@ -24,13 +29,21 @@
  * @param {number} damage   The weapon's damage.
  * @property {number} damage
  */
-
+function Weapon (name, damage) {
+  this.damage = damage;
+  Item.call(this, name);
+}
 
 /**
  * Weapon Extends Item Class
  * -----------------------------
  */
 
+Weapon.prototype = Object.create(Item.prototype, {
+  constructor: {
+    value: Weapon
+  }
+});
 
 
 /**
@@ -48,14 +61,21 @@
  * @param {number} energy     The energy the food provides.
  * @property {number} energy
  */
-
+function Food (name, energy) {
+  this.energy = energy;
+  Item.call(this, name);
+}
 
 /**
  * Food Extends Item Class
  * -----------------------------
  */
 
-
+Food.prototype = Object.create(Item.prototype, {
+  constructor: {
+    value: Food
+  }
+});
 
 /**
  * Class => Player(name, health, strength, speed)
@@ -91,8 +111,27 @@
  *
  * @name checkPack
  */
+var newPlayer = Player();
 
-
+function Player (name, health, strength, speed) {
+  var pack = [];
+  var maxHealth = health;
+  this.name = name;
+  this.health = health;
+  this.strength = strength;
+  this.speed = speed;
+  this.isAlive = true;
+  this.equipped = false;
+  
+  this.getPack = function () {
+    return pack;
+  };
+  
+  this.getMaxHealth = function () {
+    return maxHealth;
+  };
+  
+}
 /**
  * Player Class Method => takeItem(item)
  * -----------------------------
@@ -111,6 +150,21 @@
  * @return {boolean} true/false     Whether player was able to store item in pack.
  */
 
+  Player.prototype.takeItem = function (item) {
+    var pack = this.getPack();
+    if (pack.length > 2) {
+      console.log("The pack is full, unable to add items.");
+      return false;
+    } 
+    pack.push(item);
+    console.log(this.name, "added", item);
+    return true;
+    
+  };
+
+  Player.prototype.checkPack = function () {
+    console.log(this.getPack().join());
+  };
 
 /**
  * Player Class Method => discardItem(item)
@@ -159,7 +213,19 @@
  * @param {Weapon} itemToEquip  The weapon item to equip.
  */
 
+Player.prototype.equip = function (itemToEquip) {
 
+  var pack = this.getPack();
+  if (!(itemToEquip instanceof Weapon)) {
+    return false;
+  }
+  var itemIndex = pack.indexOf(itemToEquip);
+  if (itemIndex > -1) {
+    //Would be an array with just one item
+    var equipped = pack.splice(itemIndex, 1)[0];
+    
+  }
+};
 /**
  * Player Class Method => eat(itemToEat)
  * -----------------------------
@@ -178,7 +244,22 @@
  * @name eat
  * @param {Food} itemToEat  The food item to eat.
  */
-
+Player.prototype.eat = function (itemToEat) {
+  var maxHealth = this.getMaxHealth();
+  var pack = this.getPack();
+  if (!(itemToEat instanceof Food)) {
+    return false;
+  }
+  var mealIndex = pack.indexOf(itemToEat);
+  
+  if (mealIndex > -1) {
+  var meal = pack.splice(mealIndex, 1)[0];
+    this.health = this.health + meal.energy;
+    if (this.health > maxHealth) {
+      this.health = maxHealth;
+    }
+  } 
+};
 
 /**
  * Player Class Method => useItem(item)
@@ -192,7 +273,14 @@
  * @name useItem
  * @param {Item/Weapon/Food} item   The item to use.
  */
-
+Player.prototype.useItem = function (item) {
+  if (item instanceof Weapon) {
+    this.equipped(item);
+  }
+  if (item instanceof Food) {
+    this.eat(item);
+  }
+};
 
 /**
  * Player Class Method => equippedWith()
@@ -207,7 +295,9 @@
  * @name equippedWith
  * @return {string/boolean}   Weapon name or false if nothing is equipped.
  */
+Player.prototype.equippedWith = function () {
 
+};
 
 /**
  * Class => Zombie(health, strength, speed)
@@ -224,7 +314,13 @@
  * @property {number} speed
  * @property {boolean} isAlive      Default value should be `true`.
  */
-
+function Zombie (health, strength, speed) {
+  var maxHealth;
+  this.health = health;
+  this.strength = strength;
+  this.speed = speed;
+  this.isAlive = true;
+}
 
 /**
  * Class => FastZombie(health, strength, speed)
